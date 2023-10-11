@@ -1,0 +1,30 @@
+plugins{
+    id 'com.android.application' version '7.0.3' apply false
+    id 'com.android.library' version '7.0.3' apply false
+    **BUILD_SCRIPT_DEPS**
+}
+
+allprojects {
+    buildscript {
+        repositories {**ARTIFACTORYREPOSITORY**
+            google()
+            jcenter()
+        }
+
+        dependencies {
+            classpath 'com.android.tools.build:gradle:7.0.3'
+        }
+    }
+
+    repositories {**ARTIFACTORYREPOSITORY**
+        google()
+        jcenter()
+        flatDir{
+            dirs "{$project(':unityLibrary').projectDir}/libs"
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

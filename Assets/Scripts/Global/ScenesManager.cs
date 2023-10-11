@@ -12,14 +12,14 @@ public class ScenesManager : MonoBehaviour
         Instance = this;
     }
 
-    public Types.Scenes targetScene;
+    public Enums.Scenes targetScene;
 
     public void LoadScene()
     {
         SceneManager.LoadScene(targetScene.ToString());
     }
 
-    public void LoadScene(Types.Scenes newScene)
+    public void LoadScene(Enums.Scenes newScene)
     {
         SceneManager.LoadScene(newScene.ToString());
     }

@@ -6,15 +6,13 @@ using UnityEngine.SceneManagement;
 
 public class MenuBtn : MonoBehaviour
 {
-    public Types.Scenes targetScene;
+    public Enums.Scenes targetScene;
     public GameObject selectedBG;
 
     
     void Awake()
     {
-        Debug.Log(SceneManager.GetActiveScene().buildIndex.ToString());
-        Debug.Log(targetScene.ToString());
-        if ((Types.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene)
+        if ((Enums.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene)
         {
             selectedBG.SetActive(false);
         }
@@ -26,7 +24,7 @@ public class MenuBtn : MonoBehaviour
 
     public void BtnClick()
     {
-        if ((Types.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene)
+        if ((Enums.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene)
             ScenesManager.Instance.LoadScene(targetScene);
     }
 }

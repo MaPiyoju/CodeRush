@@ -20,5 +20,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Profile/ProfileMain.unity
     guid: 09e1b09e457bc26479a3361dfb2548d5
+  - enabled: 1
+    path: Assets/Scenes/General/Quiz.unity
+    guid: 699dfb0993f44ce44b199362510f1102
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: 75323316b87cfe24d8195cf9cd482acb, type: 2}
