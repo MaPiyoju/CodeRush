@@ -6,12 +6,10 @@ using UnityEngine.UI;
 
 public class AttemptItemHandler : MonoBehaviour
 {
-    private TextMeshProUGUI _txt;
     private Image[] _images;
 
     private void Awake()
     {
-        _txt = GetComponentInChildren<TextMeshProUGUI>();
         _images = GetComponentsInChildren<Image>();
     }
 

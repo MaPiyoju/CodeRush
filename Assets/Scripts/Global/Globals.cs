@@ -1,4 +1,4 @@
 public static class Globals
 {
-    public static Enums.QuizTypes gameMode = 0;
+    public static Enums.QuizTypes gameMode = (Enums.QuizTypes)1;
 }

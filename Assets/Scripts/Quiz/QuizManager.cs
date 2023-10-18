@@ -74,17 +74,18 @@ public class QuizManager : MonoBehaviour
 
         _failMarks = rushGO.GetComponentsInChildren<AttemptItemHandler>();
 
+        GenerateQuestion();
+
         quizType = Globals.gameMode;
-        if (quizType != Enums.QuizTypes.Practice)
+        if (quizType == Enums.QuizTypes.Practice)
         {
-            practiceGO.SetActive(false);
+            practiceGO.SetActive(true);
         }
         else
         {
-            rushGO.SetActive(false);
+            rushGO.SetActive(true);
+            rushGO.GetComponentInChildren<TimeHandler>().SetTimer();
         }
-
-        GenerateQuestion();
     }
 
     void GenerateQuestion()
