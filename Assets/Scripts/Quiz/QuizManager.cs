@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.ConstrainedExecution;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Color = UnityEngine.Color;
 
 public class QuizManager : MonoBehaviour
 {
@@ -13,14 +13,13 @@ public class QuizManager : MonoBehaviour
     public GameObject questionTxt;
     public GameObject optionPrefab;
     public GameObject optionContainer;
-    public GameObject statusSlider;
+    public Enums.QuizTypes quizType = 0;
 
     private GameObject[] _options;
 
-    private QuestionModel[] testQuestions = new QuestionModel[5];
-    private string[] opts = new string[4];
-    private Slider _slider;
 
+    //Question vars
+    private QuestionModel[] _questions;
     
     //Position questions vars
     private RectTransform _transform;
@@ -30,30 +29,61 @@ public class QuizManager : MonoBehaviour
     private int _optCont = 0;
     private Vector3 _targetOptsPos;
 
-    void Awake()
+    //Camera vars
+    private Camera _camera;
+    private int _bcChange = 0;
+    private float _tChange = 0f;
+
+    //Practice mode vars
+    public GameObject practiceGO;
+    private Slider _slider;
+
+    //Rush mode vars
+    public GameObject rushGO;
+    public TextMeshProUGUI rushGO_Count;
+    private AttemptItemHandler[] _failMarks;
+    private int _attempts = 0;
+    private int _correct = 0;
+
+
+    async void Awake()
     {
         var seed = Environment.TickCount;
         var random = new System.Random(seed);
 
-        for (int i = 0; i < 4; i++)
-        {
-            opts[i] = $"Opción {i}";
-        }
-
-        for (int i = 0; i < testQuestions.Length; i++)
-        {
-            int ranCorrect = random.Next(0, 4);
-            testQuestions[i] = new QuestionModel($"Pregunta {i}", Enums.QuestionType.Closed, opts, ranCorrect, Enums.QuestionDifficulty.Easy, Enums.QuestionCategory.Logic);
-        }
         _options = new GameObject[0];
-        _slider = statusSlider.GetComponentInChildren<Slider>();
+        _slider = practiceGO.GetComponentInChildren<Slider>();
 
         _transform = GetComponent<RectTransform>();
         _targetPos = _transform.position;
-    }
+        _camera = Camera.main;
 
-    private void Start()
-    {
+        FirestoreManager dbManager = new FirestoreManager();
+        List<Dictionary<string, object>> items = await dbManager.ReadDataAsync("questions");
+        _questions = new QuestionModel[items.Count];
+        int cont = 0;
+        foreach (var item in items)
+        {
+            string[] opts = ((IEnumerable)item["answers"]).Cast<object>()
+                                 .Select(x => x.ToString())
+                                 .ToArray();
+            
+            _questions[cont] = new QuestionModel(item["question"].ToString(), item["type"].ToString() == "open" ? Enums.QuestionType.Open : Enums.QuestionType.Closed, opts, int.Parse(item["correct"].ToString() ?? "0"), (Enums.QuestionDifficulty)Enum.Parse(typeof(Enums.QuestionDifficulty), item["difficulty"].ToString()), (Enums.QuestionCategory)Enum.Parse(typeof(Enums.QuestionCategory), item["category"].ToString()));
+            cont++;
+        }
+
+        _failMarks = rushGO.GetComponentsInChildren<AttemptItemHandler>();
+
+        quizType = Globals.gameMode;
+        if (quizType != Enums.QuizTypes.Practice)
+        {
+            practiceGO.SetActive(false);
+        }
+        else
+        {
+            rushGO.SetActive(false);
+        }
+
         GenerateQuestion();
     }
 
@@ -63,16 +93,16 @@ public class QuizManager : MonoBehaviour
 
         var seed = Environment.TickCount;
         var random = new System.Random(seed);
-        int ranPregunta= random.Next(0, testQuestions.Length);
+        int ranPregunta= random.Next(0, _questions.Length);
 
-        questionTxt.GetComponent<TextMeshProUGUI>().text = testQuestions[ranPregunta].Question;
-        _options = new GameObject[testQuestions[ranPregunta].Answers.Length];
+        questionTxt.GetComponent<TextMeshProUGUI>().text = _questions[ranPregunta].Question;
+        _options = new GameObject[_questions[ranPregunta].Answers.Length];
         
         for (int i = 0; i < _options.Length; i++)
         {
             _options[i] = Instantiate(optionPrefab, optionContainer.transform);
-            _options[i].GetComponentInChildren<TextMeshProUGUI>().text = testQuestions[ranPregunta].Answers[i];
-            if (i == testQuestions[ranPregunta].Correct)
+            _options[i].GetComponentInChildren<TextMeshProUGUI>().text = _questions[ranPregunta].Answers[i];
+            if (i == _questions[ranPregunta].Correct)
                 _options[i].GetComponentInChildren<OptionHandler>().correctOption = true;
             else
                 _options[i].GetComponentInChildren<OptionHandler>().correctOption = false;
@@ -132,17 +162,51 @@ public class QuizManager : MonoBehaviour
     public void Answered(bool isCorrect)
     {
         if (isCorrect == true)
-            _slider.value += 0.1F;
+        {
+            if (quizType == Enums.QuizTypes.Practice)
+                _slider.value += 0.1F;
+            else
+            {
+                _correct++;
+                rushGO_Count.text = _correct.ToString();
+            }
+
+            _bcChange = 1;
+        }
         else
-            Debug.Log("Mal");
-
-
+        {
+            if (quizType != Enums.QuizTypes.Practice) { 
+                _failMarks[_attempts].Mark();
+                _attempts++;
+            }
+            _bcChange = 2;
+            Vibration.Vibrate(250);
+        }
+        _tChange = Time.time;
         GenerateQuestion();
+
+        if (_attempts == 3)//Lose
+        {
+            ScenesManager.Instance.LoadScene(Enums.Scenes.SingleMain);
+        }
+    }
+
+    private void LerpCamera()
+    {
+        float t = Mathf.PingPong(Time.time, 1f) / 1f;
+        Color targetColor = (_bcChange == 1) ? Color.green : Color.red;
+        Color lerp = Color.Lerp(Color.white, targetColor, t);
+        _camera.backgroundColor = lerp;
+        if (Time.time - _tChange > 0.2f)
+        {
+            _bcChange = 0;
+            _camera.backgroundColor = Color.white;
+        }
     }
 
     private void Update()
     {
-        var step = 3000f * Time.deltaTime;
+        var step = 5000f * Time.deltaTime;
         if (_moveEnable)
         {
             _transform.position = Vector3.MoveTowards(_transform.position, _targetPos, step);
@@ -179,6 +243,10 @@ public class QuizManager : MonoBehaviour
                     _moveOptsEnable = false;
                 }
             }
+        }
+
+        if (_bcChange > 0) {
+            LerpCamera();
         }
     }
 }

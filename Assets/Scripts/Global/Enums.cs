@@ -31,8 +31,15 @@ public static class Enums
     public enum QuestionCategory
     {
         Logic,
-        Sintax,
+        python_syntax,
         Performance,
         Algorithms
+    }
+	
+	public enum QuizTypes
+    {
+        Practice,
+        Rush,
+        Battle
     }
 }
