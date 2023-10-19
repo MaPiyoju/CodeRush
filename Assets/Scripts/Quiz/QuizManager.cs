@@ -13,8 +13,8 @@ public class QuizManager : MonoBehaviour
     public GameObject questionTxt;
     public GameObject optionPrefab;
     public GameObject optionContainer;
-    public Enums.QuizTypes quizType = 0;
-
+    
+    private Enums.QuizTypes quizType = 0;
     private GameObject[] _options;
 
 
@@ -184,12 +184,24 @@ public class QuizManager : MonoBehaviour
             Vibration.Vibrate(250);
         }
         _tChange = Time.time;
-        GenerateQuestion();
-
         if (_attempts == 3)//Lose
         {
-            ScenesManager.Instance.LoadScene(Enums.Scenes.SingleMain);
+            StartCoroutine("ShowResults");
         }
+        else
+        {
+            GenerateQuestion();
+        }
+    }
+
+    IEnumerator ShowResults()
+    {
+        rushGO.GetComponentInChildren<TimeHandler>().StopTimer();
+        Globals.lastRushScore = _correct;
+        Globals.lastTime = rushGO.GetComponentInChildren<TimeHandler>().GetTime();
+
+        yield return new WaitForSeconds(2);
+        ScenesManager.Instance.LoadScene(Enums.Scenes.Results);
     }
 
     private void LerpCamera()

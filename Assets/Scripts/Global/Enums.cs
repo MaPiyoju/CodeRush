@@ -11,7 +11,8 @@ public static class Enums
         BattleMain,
         StatsMain,
         ProfileMain,
-        Quiz
+        Quiz,
+        Results
     }
 
     public enum QuestionType
@@ -30,7 +31,7 @@ public static class Enums
 
     public enum QuestionCategory
     {
-        Logic,
+        logic,
         python_syntax,
         Performance,
         Algorithms

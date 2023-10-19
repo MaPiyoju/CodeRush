@@ -333,3 +333,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   correctOption: 0
   quizManager: {fileID: 0}
+  audioEffects:
+  - {fileID: 8300000, guid: 65c91a45a3f08684091e101d8539c96c, type: 3}
+  - {fileID: 8300000, guid: 32284ee6d37800a4fb4b4dbd7147df6d, type: 3}

@@ -27,6 +27,11 @@ public class TimeHandler : MonoBehaviour
         }
     }
 
+    public float GetTime()
+    {
+        return _ellapsedTime;
+    }
+
     public void SetTimer()
     {
         _startTime = Time.time;
