@@ -33,8 +33,8 @@ public static class Enums
     {
         logic,
         python_syntax,
-        Performance,
-        Algorithms
+        performance,
+        algorithms
     }
 	
 	public enum QuizTypes
