@@ -13,7 +13,8 @@ public class QuizManager : MonoBehaviour
     public GameObject questionTxt;
     public GameObject optionPrefab;
     public GameObject optionContainer;
-    
+    public GameObject inputTxt;
+
     private Enums.QuizTypes quizType = 0;
     private GameObject[] _options;
 
@@ -24,10 +25,12 @@ public class QuizManager : MonoBehaviour
     //Position questions vars
     private RectTransform _transform;
     private Vector3 _targetPos;
+    private Enums.QuestionType _type = Enums.QuestionType.Closed;
     private bool _moveEnable = false;
     private bool _moveOptsEnable = false;
     private int _optCont = 0;
     private Vector3 _targetOptsPos;
+    private Vector3 _targetTxtPos;
 
     //Camera vars
     private Camera _camera;
@@ -86,6 +89,9 @@ public class QuizManager : MonoBehaviour
             rushGO.SetActive(true);
             rushGO.GetComponentInChildren<TimeHandler>().SetTimer();
         }
+
+        _targetTxtPos = inputTxt.GetComponent<RectTransform>().localPosition;
+        inputTxt.SetActive(false);
     }
 
     void GenerateQuestion()
@@ -94,39 +100,47 @@ public class QuizManager : MonoBehaviour
 
         var seed = Environment.TickCount;
         var random = new System.Random(seed);
-        int ranPregunta= random.Next(0, _questions.Length);
+        int ranPregunta= random.Next(0, _questions.Length-1);
 
         questionTxt.GetComponent<TextMeshProUGUI>().text = _questions[ranPregunta].Question;
         _options = new GameObject[_questions[ranPregunta].Answers.Length];
-        
-        for (int i = 0; i < _options.Length; i++)
-        {
-            _options[i] = Instantiate(optionPrefab, optionContainer.transform);
-            _options[i].GetComponentInChildren<TextMeshProUGUI>().text = _questions[ranPregunta].Answers[i];
-            if (i == _questions[ranPregunta].Correct)
-                _options[i].GetComponentInChildren<OptionHandler>().correctOption = true;
-            else
-                _options[i].GetComponentInChildren<OptionHandler>().correctOption = false;
+        _type = _questions[ranPregunta].Type;
 
-            _options[i].GetComponentInChildren<OptionHandler>().quizManager = this.gameObject;
-            
+        //In case of closed question
+        if (_type == Enums.QuestionType.Closed)
+        {
+            for (int i = 0; i < _options.Length; i++)
+            {
+                _options[i] = Instantiate(optionPrefab, optionContainer.transform);
+                _options[i].GetComponentInChildren<TextMeshProUGUI>().text = _questions[ranPregunta].Answers[i];
+                if (i == _questions[ranPregunta].Correct)
+                    _options[i].GetComponentInChildren<OptionHandler>().correctOption = true;
+                else
+                    _options[i].GetComponentInChildren<OptionHandler>().correctOption = false;
+
+                _options[i].GetComponentInChildren<OptionHandler>().quizManager = this.gameObject;
+
+            }
+
+            _options = ShuffleOptions(_options);
+
+            int initY = 20;
+            for (int i = 0; i < _options.Length; i++)
+            {
+                Vector3 initPos = _options[i].GetComponent<RectTransform>().localPosition;
+                _options[i].GetComponent<RectTransform>().localPosition = new Vector3(initPos.x, initY, initPos.z);
+                initY -= 240;
+                _options[i].SetActive(false);
+                _targetOptsPos = initPos;
+            }
+            Debug.Log(_options.Length);
         }
-
-        int[] indices = new int[_options.Length];
-        for (int i = 0; i < _options.Length; i++)
+        else
         {
-            indices[i] = i;
-        }
-        _options = ShuffleOptions(_options);
-
-        int initY = 20;
-        for (int i = 0; i < _options.Length; i++)
-        {
-            Vector3 initPos = _options[i].GetComponent<RectTransform>().localPosition;
-            _options[i].GetComponent<RectTransform>().localPosition = new Vector3(initPos.x, initY, initPos.z);
-            initY -= 240;
-            _options[i].SetActive(false);
-            _targetOptsPos = initPos;
+            Vector3 initPos = inputTxt.GetComponent<RectTransform>().localPosition;
+            inputTxt.GetComponent<RectTransform>().localPosition = new Vector3(initPos.x + 1150, initPos.y, initPos.z);
+            inputTxt.SetActive(true);
+            inputTxt.GetComponent<OptionHandler>().enterEnabled = true;
         }
         _transform.position = new Vector3(-550, _transform.position.y, _transform.position.z);
         _moveEnable = true;
@@ -223,34 +237,41 @@ public class QuizManager : MonoBehaviour
         if (_moveEnable)
         {
             _transform.position = Vector3.MoveTowards(_transform.position, _targetPos, step);
-            
+
             if (Vector3.Distance(_transform.position, _targetPos) < 0.001f)
             {
                 _transform.position = _targetPos;
                 _moveEnable = false;
 
-                for (int i = 0; i < _options.Length; i++)
-                {
-                    Vector3 initPos = _options[i].GetComponent<RectTransform>().localPosition;
-                    _options[i].GetComponent<RectTransform>().localPosition = new Vector3(initPos.x - 1100, initPos.y, initPos.z);
-                    _options[i].SetActive(true);
+                if (_type == Enums.QuestionType.Closed) {
+                    for (int i = 0; i < _options.Length; i++)
+                    {
+                        Vector3 initPos = _options[i].GetComponent<RectTransform>().localPosition;
+                        _options[i].GetComponent<RectTransform>().localPosition = new Vector3(initPos.x - 1100, initPos.y, initPos.z);
+                        _options[i].SetActive(true);
+                    }
+                    _moveOptsEnable = true;
                 }
-
-                _moveOptsEnable = true;
+                else
+                {
+                    _moveOptsEnable = true;
+                }
             }
         }
 
         if (_moveOptsEnable)
         {
-            RectTransform optTmp = _options[_optCont].GetComponent<RectTransform>();
-            Vector3 targetTmp = new Vector3(_targetOptsPos.x, optTmp.localPosition.y, _targetOptsPos.z);
+            RectTransform optTmp = _type == Enums.QuestionType.Closed ? _options[_optCont].GetComponent<RectTransform>() : inputTxt.GetComponent<RectTransform>();
+            Vector3 optTarget = _type == Enums.QuestionType.Closed ? _targetOptsPos : _targetTxtPos;
+
+            Vector3 targetTmp = new Vector3(optTarget.x, optTmp.localPosition.y, optTarget.z);
             optTmp.localPosition = Vector3.MoveTowards(optTmp.localPosition, targetTmp, step);
 
             if (Vector3.Distance(optTmp.localPosition, targetTmp) < 0.001f)
             {
                 optTmp.localPosition = targetTmp;
                 _optCont++;
-                if (_optCont == _options.Length)
+                if (_optCont == _options.Length || _type == Enums.QuestionType.Open)
                 {
                     _optCont = 0;
                     _moveOptsEnable = false;
