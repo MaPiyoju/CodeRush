@@ -24,7 +24,9 @@ public class MenuBtn : MonoBehaviour
 
     public void BtnClick()
     {
-        if ((Enums.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene)
-            ScenesManager.Instance.LoadScene(targetScene);
+        if ((Enums.Scenes)SceneManager.GetActiveScene().buildIndex != targetScene) {
+            ScenesManager test = new ScenesManager();
+            test.LoadScene(targetScene);
+        }
     }
 }

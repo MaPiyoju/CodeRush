@@ -133,7 +133,6 @@ public class QuizManager : MonoBehaviour
                 _options[i].SetActive(false);
                 _targetOptsPos = initPos;
             }
-            Debug.Log(_options.Length);
         }
         else
         {

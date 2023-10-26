@@ -6,6 +6,7 @@ public static class Enums
 {
     public enum Scenes
     {
+        SignIn,
         Home,
         SingleMain,
         BattleMain,
