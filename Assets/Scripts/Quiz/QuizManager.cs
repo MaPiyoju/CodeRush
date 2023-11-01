@@ -213,6 +213,9 @@ public class QuizManager : MonoBehaviour
         Globals.lastRushScore = _correct;
         Globals.lastTime = rushGO.GetComponentInChildren<TimeHandler>().GetTime();
 
+        Globals.lives--;
+        LifeHandler.UpdateLife();
+
         yield return new WaitForSeconds(2);
         ScenesManager.Instance.LoadScene(Enums.Scenes.Results);
     }

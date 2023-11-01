@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class ResultManager : MonoBehaviour
 {
+    public GameObject retryBtn;
+
     private TextMeshProUGUI[] _resultStats;
     private int _loadingStat = 0;
     private Vector3[] _initPos;
@@ -28,6 +30,9 @@ public class ResultManager : MonoBehaviour
             Color tmpColor = _resultStats[i].color;
             _resultStats[i].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, 0);
         }
+
+        if (Globals.lives < 1)
+            retryBtn.SetActive(false);
     }
 
     // Start is called before the first frame update

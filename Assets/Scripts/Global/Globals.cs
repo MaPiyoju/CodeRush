@@ -6,4 +6,6 @@ public static class Globals
 
     public static float lastTime = 0;
 
+    public static int lives = 3;
+
 }
