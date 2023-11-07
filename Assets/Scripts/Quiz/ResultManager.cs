@@ -19,10 +19,15 @@ public class ResultManager : MonoBehaviour
         System.TimeSpan calcEllapsed = System.TimeSpan.FromSeconds(Globals.lastTime);
         _resultStats[1].text = string.Format("{0}:{1}", calcEllapsed.Minutes < 10 ? "0" + calcEllapsed.Minutes.ToString() : calcEllapsed.Minutes, calcEllapsed.Seconds < 10 ? "0" + calcEllapsed.Seconds.ToString() : calcEllapsed.Seconds);
 
+
+        int expectedTime = Globals.lastRushScore * 5;
+        int score = (Globals.lastRushScore * 25) + Mathf.CeilToInt((expectedTime/Globals.lastTime) * 100);
+        _resultStats[2].text = score.ToString();
+
         _initPos = new Vector3[_resultStats.Length];
         _targetPos = new Vector3[_resultStats.Length];
         
-        for(int i = 0; i < _resultStats.Length; i++) 
+        for(int i = 0; i < _resultStats.Length-1; i++) 
         {
             _targetPos[i] = _resultStats[i].GetComponent<RectTransform>().localPosition;
             _initPos[i] = new Vector3(_initPos[i].x, _initPos[i].y - 1000, _initPos[i].z);
@@ -45,7 +50,7 @@ public class ResultManager : MonoBehaviour
     void Update()
     {
         var step = 1500f * Time.deltaTime;
-        if (_loadingStat < _resultStats.Length)
+        if (_loadingStat < _resultStats.Length-1)
         {
             _resultStats[_loadingStat].GetComponent<RectTransform>().localPosition = Vector3.MoveTowards(_resultStats[_loadingStat].GetComponent<RectTransform>().localPosition, _targetPos[_loadingStat], step);
 
