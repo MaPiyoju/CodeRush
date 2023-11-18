@@ -13,7 +13,8 @@ public static class Enums
         StatsMain,
         ProfileMain,
         Quiz,
-        Results
+        Results,
+        SignUp
     }
 
     public enum QuestionType

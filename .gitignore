@@ -72,6 +72,12 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 google-services.*
-[Aa]ssets/[Ff]irebase/[Pp]lugins/*
+[Aa]ssets/[Ff]irebase/*
 [Aa]ssets/[Pp]lugins/*
+Packages/*
+[Aa]ssets/Adaptive Performance
+key1.keystore
+Assets/Editor Default*
+Assets/ExternalDependencyManager*
+
 *.bundle
