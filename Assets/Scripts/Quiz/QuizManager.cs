@@ -47,6 +47,7 @@ public class QuizManager : MonoBehaviour
     private AttemptItemHandler[] _failMarks;
     private int _attempts = 0;
     private int _correct = 0;
+    private bool _canAnimate = false;
 
 
     async void Awake()
@@ -76,6 +77,8 @@ public class QuizManager : MonoBehaviour
         }
 
         _failMarks = rushGO.GetComponentsInChildren<AttemptItemHandler>();
+
+        Globals.lastNumQuestions = 0;
 
         GenerateQuestion();
 
@@ -144,6 +147,8 @@ public class QuizManager : MonoBehaviour
         _transform.position = new Vector3(-550, _transform.position.y, _transform.position.z);
         _moveEnable = true;
 
+        Globals.lastNumQuestions++;
+        _canAnimate = true;
     }
 
     GameObject[] ShuffleOptions(GameObject[] baseArr)
@@ -236,7 +241,7 @@ public class QuizManager : MonoBehaviour
     private void Update()
     {
         var step = 5000f * Time.deltaTime;
-        if (_moveEnable)
+        if (_moveEnable && _canAnimate)
         {
             _transform.position = Vector3.MoveTowards(_transform.position, _targetPos, step);
 
@@ -277,6 +282,7 @@ public class QuizManager : MonoBehaviour
                 {
                     _optCont = 0;
                     _moveOptsEnable = false;
+                    _canAnimate = false;
                 }
             }
         }

@@ -1,5 +1,6 @@
 using Firebase.Firestore;
 using System;
+using System.Collections.Generic;
 
 [FirestoreData]
 public class UserModel
@@ -23,6 +24,7 @@ public class UserModel
     public int streak { get; set; }
     [FirestoreProperty]
     public string pic { get; set; }
+    
     [FirestoreProperty]
-    public MatchModel[] history { get; set; }
+    public List<MatchModel> history { get; set; }
 }

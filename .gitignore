@@ -79,5 +79,6 @@ Packages/*
 key1.keystore
 Assets/Editor Default*
 Assets/ExternalDependencyManager*
+Assets/Firebase/m2repository/*
 
 *.bundle

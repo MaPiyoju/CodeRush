@@ -1,5 +1,13 @@
+using Firebase.Firestore;
+using System.Collections.Generic;
+using System;
 using TMPro;
 using UnityEngine;
+using Firebase.Extensions;
+using System.Threading.Tasks;
+using System.Collections;
+using System.Linq;
+using System.Xml.Linq;
 
 public class ResultManager : MonoBehaviour
 {
@@ -10,7 +18,7 @@ public class ResultManager : MonoBehaviour
     private Vector3[] _initPos;
     private Vector3[] _targetPos;
 
-    private void Awake()
+    async void Awake()
     {
         _resultStats = GetComponentsInChildren<TextMeshProUGUI>();
 
@@ -36,6 +44,66 @@ public class ResultManager : MonoBehaviour
             _resultStats[i].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, 0);
         }
 
+
+        Firebase.Auth.FirebaseAuth auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
+
+        FirebaseFirestore db = FirebaseFirestore.DefaultInstance;
+        DocumentReference docRef = db.Collection("users").Document(auth.CurrentUser.UserId);
+        
+        MatchModel newmatch = new MatchModel()
+        {
+            date = DateTime.Now,
+            score = score,
+            time = Mathf.CeilToInt(Globals.lastTime),
+            type = Globals.gameMode,
+            win = true,
+            questions = Globals.lastNumQuestions,
+            correctQuestions = Globals.lastRushScore
+        };
+
+        FirestoreManager dbManager = new FirestoreManager();
+        List<Dictionary<string, object>> items = await dbManager.ReadDataByIdAsync("users", auth.CurrentUser.UserId);
+
+
+        List<MatchModel> history = new List<MatchModel>();
+        foreach (var item in items)
+        {
+            foreach (Dictionary<string, object> hst in (IEnumerable)item["history"])
+            {
+                var ts = (Timestamp)hst["date"];
+                var currDt = ts.ToDateTime();
+
+                MatchModel matchTmp = new()
+                {
+                    date = currDt,
+                    score = int.Parse(hst["score"].ToString()),
+                    time = int.Parse(hst["time"].ToString()),
+                    type = (Enums.QuizTypes)int.Parse(hst["type"].ToString()),
+                    win = bool.Parse(hst["win"].ToString()),
+                    questions = int.Parse(hst["questions"].ToString()),
+                    correctQuestions = int.Parse(hst["correctQuestions"].ToString())
+                };
+                history.Add(matchTmp);
+            }
+
+            history.Add(newmatch);
+
+            int newExp = int.Parse(item["exp"].ToString()) + score;
+            int maxStreak = int.Parse(item["streak"].ToString()) > Globals.lastRushScore ? int.Parse(item["streak"].ToString()) : Globals.lastRushScore;
+
+            Dictionary<string, object> last = new()
+            {
+                { "history", history.ToArray()},
+                { "lives", Globals.lives},
+                { "exp", newExp },
+                { "streak", maxStreak }
+            };
+            await docRef.UpdateAsync(last).ContinueWithOnMainThread(task =>
+            {
+                Debug.Log("Updated history");
+            });
+        }
+
         if (Globals.lives < 1)
             retryBtn.SetActive(false);
     }
@@ -49,23 +117,25 @@ public class ResultManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var step = 1500f * Time.deltaTime;
-        if (_loadingStat < _resultStats.Length-1)
+        if (_resultStats.Length > 0)
         {
-            _resultStats[_loadingStat].GetComponent<RectTransform>().localPosition = Vector3.MoveTowards(_resultStats[_loadingStat].GetComponent<RectTransform>().localPosition, _targetPos[_loadingStat], step);
-
-            Color tmpColor = _resultStats[_loadingStat].color;
-            float fadeIn = tmpColor.a + Time.deltaTime;
-
-            _resultStats[_loadingStat].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, fadeIn);
-
-            if (Vector3.Distance(_resultStats[_loadingStat].GetComponent<RectTransform>().localPosition, _targetPos[_loadingStat]) < 0.001f)
+            var step = 1500f * Time.deltaTime;
+            if (_loadingStat < _resultStats.Length - 1)
             {
-                _resultStats[_loadingStat].GetComponent<RectTransform>().localPosition  = _targetPos[_loadingStat];
-                _resultStats[_loadingStat].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, 1);
-                _loadingStat++;
+                _resultStats[_loadingStat].GetComponent<RectTransform>().localPosition = Vector3.MoveTowards(_resultStats[_loadingStat].GetComponent<RectTransform>().localPosition, _targetPos[_loadingStat], step);
+
+                Color tmpColor = _resultStats[_loadingStat].color;
+                float fadeIn = tmpColor.a + Time.deltaTime;
+
+                _resultStats[_loadingStat].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, fadeIn);
+
+                if (Vector3.Distance(_resultStats[_loadingStat].GetComponent<RectTransform>().localPosition, _targetPos[_loadingStat]) < 0.001f)
+                {
+                    _resultStats[_loadingStat].GetComponent<RectTransform>().localPosition = _targetPos[_loadingStat];
+                    _resultStats[_loadingStat].color = new Color(tmpColor.r, tmpColor.g, tmpColor.b, 1);
+                    _loadingStat++;
+                }
             }
         }
-        
     }
 }

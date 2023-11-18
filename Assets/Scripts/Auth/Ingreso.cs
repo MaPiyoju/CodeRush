@@ -3,6 +3,7 @@ using Firebase.Firestore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -43,20 +44,33 @@ public class Ingreso : MonoBehaviour
             Firebase.Auth.AuthResult result = login.Result;
             FirebaseFirestore db = FirebaseFirestore.DefaultInstance;
             DocumentReference docRef = db.Collection("users").Document(auth.CurrentUser.UserId);
+
             Dictionary<string, object> last = new Dictionary<string, object>
-        {
-            { "last_login",DateTimeOffset.FromUnixTimeMilliseconds((long)auth.CurrentUser.Metadata.LastSignInTimestamp).LocalDateTime },
-            { "level", 1}
-        };
+            {
+                { "last_login",DateTimeOffset.FromUnixTimeMilliseconds((long)auth.CurrentUser.Metadata.LastSignInTimestamp).LocalDateTime }
+            };
             docRef.UpdateAsync(last).ContinueWithOnMainThread(task => {
                 Debug.Log("Updated last login");
             });
+
+            LoadCurrDataAsync(auth);
 
             Debug.LogFormat("User signed in successfully: {0} ({1})",
             result.User.DisplayName, result.User.UserId);
         }
         
         
+    }
+
+    public async void LoadCurrDataAsync(Firebase.Auth.FirebaseAuth auth)
+    {
+        FirestoreManager dbManager = new FirestoreManager();
+        List<Dictionary<string, object>> items = await dbManager.ReadDataByIdAsync("users", auth.CurrentUser.UserId);
+        foreach (var item in items)
+        {
+            Globals.lives = int.Parse(item["lives"].ToString());
+            LifeHandler.UpdateLife();
+        }
     }
 
 }

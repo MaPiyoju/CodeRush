@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using Firebase.Firestore;
 using Firebase.Extensions;
 using System;
+using System.Collections.Generic;
 
 public class Registration : MonoBehaviour
 {
@@ -127,7 +128,7 @@ public class Registration : MonoBehaviour
             lives=3, 
             streak=0,
             pic="",
-            history=new MatchModel[0]
+            history=new List<MatchModel>()
         };
         docRef.SetAsync(newUser).ContinueWithOnMainThread(task => {
             Debug.Log("Added data to the USERs document in the USERS collection.");
