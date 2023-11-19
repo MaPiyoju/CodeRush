@@ -30,9 +30,6 @@ public class OptionHandler : MonoBehaviour
     {
         string inputText = GetComponentsInChildren<TextMeshProUGUI>()[1].text.ToLower().Trim();
 
-
-        quizManager.GetComponent<QuizManager>().Answered(txtCorrectOption.ToLower() == inputText);
-
         if (txtCorrectOption.ToLower() == inputText)
             Camera.main.GetComponent<AudioSource>().clip = audioEffects[0];
         else
@@ -42,5 +39,7 @@ public class OptionHandler : MonoBehaviour
         GetComponentsInChildren<TextMeshProUGUI>()[1].SetText("");
         this.gameObject.SetActive(false);
         Camera.main.GetComponent<AudioSource>().Play();
+
+        quizManager.GetComponent<QuizManager>().Answered(txtCorrectOption.ToLower() == inputText);
     }
 }

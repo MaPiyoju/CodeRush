@@ -18,14 +18,13 @@ public class QuizManager : MonoBehaviour
     private Enums.QuizTypes quizType = 0;
     private GameObject[] _options;
 
-
     //Question vars
     private QuestionModel[] _questions;
     
     //Position questions vars
     private RectTransform _transform;
     private Vector3 _targetPos;
-    private Enums.QuestionType _type = Enums.QuestionType.Closed;
+    private Enums.QuestionType _type = Enums.QuestionType.closed;
     private bool _moveEnable = false;
     private bool _moveOptsEnable = false;
     private int _optCont = 0;
@@ -72,7 +71,7 @@ public class QuizManager : MonoBehaviour
                                  .Select(x => x.ToString())
                                  .ToArray();
             
-            _questions[cont] = new QuestionModel(item["question"].ToString(), item["type"].ToString() == "open" ? Enums.QuestionType.Open : Enums.QuestionType.Closed, opts, int.Parse(item["correct"].ToString() ?? "0"), (Enums.QuestionDifficulty)Enum.Parse(typeof(Enums.QuestionDifficulty), item["difficulty"].ToString()), (Enums.QuestionCategory)Enum.Parse(typeof(Enums.QuestionCategory), item["category"].ToString()));
+            _questions[cont] = new QuestionModel(item["question"].ToString(), item["type"].ToString() == "open" ? Enums.QuestionType.open : Enums.QuestionType.closed, opts, int.Parse(item["correct"].ToString() ?? "0"), (Enums.QuestionDifficulty)Enum.Parse(typeof(Enums.QuestionDifficulty), item["difficulty"].ToString()), (Enums.QuestionCategory)Enum.Parse(typeof(Enums.QuestionCategory), item["category"].ToString()));
             cont++;
         }
 
@@ -86,6 +85,7 @@ public class QuizManager : MonoBehaviour
         if (quizType == Enums.QuizTypes.Practice)
         {
             practiceGO.SetActive(true);
+            practiceGO.GetComponentInChildren<TimeHandler>().SetTimer();
         }
         else
         {
@@ -110,7 +110,7 @@ public class QuizManager : MonoBehaviour
         _type = _questions[ranPregunta].Type;
 
         //In case of closed question
-        if (_type == Enums.QuestionType.Closed)
+        if (_type == Enums.QuestionType.closed)
         {
             for (int i = 0; i < _options.Length; i++)
             {
@@ -183,13 +183,14 @@ public class QuizManager : MonoBehaviour
         if (isCorrect == true)
         {
             if (quizType == Enums.QuizTypes.Practice)
+            {
                 _slider.value += 0.1F;
+            }
             else
             {
-                _correct++;
                 rushGO_Count.text = _correct.ToString();
             }
-
+            _correct++;
             _bcChange = 1;
         }
         else
@@ -202,7 +203,7 @@ public class QuizManager : MonoBehaviour
             Vibration.Vibrate(250);
         }
         _tChange = Time.time;
-        if (_attempts == 3)//Lose
+        if (_attempts == 3 || _slider.value == 1F)//Lose
         {
             StartCoroutine("ShowResults");
         }
@@ -214,10 +215,18 @@ public class QuizManager : MonoBehaviour
 
     IEnumerator ShowResults()
     {
-        rushGO.GetComponentInChildren<TimeHandler>().StopTimer();
-        Globals.lastRushScore = _correct;
-        Globals.lastTime = rushGO.GetComponentInChildren<TimeHandler>().GetTime();
+        if (quizType == Enums.QuizTypes.Practice)
+        {
+            practiceGO.GetComponentInChildren<TimeHandler>().StopTimer();
+            Globals.lastTime = practiceGO.GetComponentInChildren<TimeHandler>().GetTime();
+        }
+        else
+        {
+            rushGO.GetComponentInChildren<TimeHandler>().StopTimer();
+            Globals.lastTime = rushGO.GetComponentInChildren<TimeHandler>().GetTime();
+        }
 
+        Globals.lastRushScore = _correct;
         Globals.lives--;
         LifeHandler.UpdateLife();
 
@@ -250,7 +259,7 @@ public class QuizManager : MonoBehaviour
                 _transform.position = _targetPos;
                 _moveEnable = false;
 
-                if (_type == Enums.QuestionType.Closed) {
+                if (_type == Enums.QuestionType.closed) {
                     for (int i = 0; i < _options.Length; i++)
                     {
                         Vector3 initPos = _options[i].GetComponent<RectTransform>().localPosition;
@@ -268,8 +277,8 @@ public class QuizManager : MonoBehaviour
 
         if (_moveOptsEnable)
         {
-            RectTransform optTmp = _type == Enums.QuestionType.Closed ? _options[_optCont].GetComponent<RectTransform>() : inputTxt.GetComponent<RectTransform>();
-            Vector3 optTarget = _type == Enums.QuestionType.Closed ? _targetOptsPos : _targetTxtPos;
+            RectTransform optTmp = _type == Enums.QuestionType.closed ? _options[_optCont].GetComponent<RectTransform>() : inputTxt.GetComponent<RectTransform>();
+            Vector3 optTarget = _type == Enums.QuestionType.closed ? _targetOptsPos : _targetTxtPos;
 
             Vector3 targetTmp = new Vector3(optTarget.x, optTmp.localPosition.y, optTarget.z);
             optTmp.localPosition = Vector3.MoveTowards(optTmp.localPosition, targetTmp, step);
@@ -278,7 +287,7 @@ public class QuizManager : MonoBehaviour
             {
                 optTmp.localPosition = targetTmp;
                 _optCont++;
-                if (_optCont == _options.Length || _type == Enums.QuestionType.Open)
+                if (_optCont == _options.Length || _type == Enums.QuestionType.open)
                 {
                     _optCont = 0;
                     _moveOptsEnable = false;

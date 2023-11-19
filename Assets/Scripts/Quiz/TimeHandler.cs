@@ -23,7 +23,8 @@ public class TimeHandler : MonoBehaviour
         {
             _ellapsedTime = Time.time - _startTime;
             System.TimeSpan calcEllapsed = System.TimeSpan.FromSeconds(_ellapsedTime);
-            _timerTxt.text = string.Format("{0}:{1}", calcEllapsed.Minutes < 10 ? "0"+calcEllapsed.Minutes.ToString() : calcEllapsed.Minutes, calcEllapsed.Seconds < 10 ? "0"+ calcEllapsed.Seconds.ToString() : calcEllapsed.Seconds);
+            if(_timerTxt)
+                _timerTxt.text = string.Format("{0}:{1}", calcEllapsed.Minutes < 10 ? "0"+calcEllapsed.Minutes.ToString() : calcEllapsed.Minutes, calcEllapsed.Seconds < 10 ? "0"+ calcEllapsed.Seconds.ToString() : calcEllapsed.Seconds);
         }
     }
 

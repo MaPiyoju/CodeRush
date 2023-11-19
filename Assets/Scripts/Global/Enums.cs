@@ -19,8 +19,8 @@ public static class Enums
 
     public enum QuestionType
     {
-        Open,
-        Closed
+        open,
+        closed
     }
 
     public enum QuestionDifficulty
