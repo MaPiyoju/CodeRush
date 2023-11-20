@@ -104,7 +104,7 @@ public class ResultManager : MonoBehaviour
             });
         }
 
-        if (Globals.lives < 1)
+        if (Globals.lives < 1 || Globals.gameMode == Enums.QuizTypes.Battle)
             retryBtn.SetActive(false);
     }
 

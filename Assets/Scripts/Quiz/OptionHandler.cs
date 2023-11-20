@@ -16,7 +16,11 @@ public class OptionHandler : MonoBehaviour
 
     public void OptionSelected()
     {
-        quizManager.GetComponent<QuizManager>().Answered(correctOption == true);
+        if(Globals.gameMode == Enums.QuizTypes.Battle)
+            quizManager.GetComponent<BattleManager>().Answered(correctOption == true);
+        else
+            quizManager.GetComponent<QuizManager>().Answered(correctOption == true);
+
 
         if (correctOption == true)
             Camera.main.GetComponent<AudioSource>().clip = audioEffects[0];
@@ -40,6 +44,10 @@ public class OptionHandler : MonoBehaviour
         this.gameObject.SetActive(false);
         Camera.main.GetComponent<AudioSource>().Play();
 
-        quizManager.GetComponent<QuizManager>().Answered(txtCorrectOption.ToLower() == inputText);
+        if (Globals.gameMode == Enums.QuizTypes.Battle)
+            quizManager.GetComponent<BattleManager>().Answered(txtCorrectOption.ToLower() == inputText);
+        else
+            quizManager.GetComponent<QuizManager>().Answered(txtCorrectOption.ToLower() == inputText);
+
     }
 }
