@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -10,6 +11,9 @@ public class swipe_menu : MonoBehaviour
     public GameObject scrollbar;
     float scroll_pos = 0;
     float[] pos;
+
+    public GameObject statsLoad;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +31,9 @@ public class swipe_menu : MonoBehaviour
 
     void OnButtonClick(int buttonIndex)
     {
-        Debug.Log("Botón presionado: " + transform.GetChild(buttonIndex).name);
+        string nivel = transform.GetChild(buttonIndex).name;
+        //Debug.Log("Botón presionado: " + nivel);
+        _ = statsLoad.GetComponent<LoadStatsScript>().ObtenerDatosPorExperienciaAsync(nivel);
     }
 
     // Update is called once per frame

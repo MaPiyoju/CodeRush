@@ -69,6 +69,7 @@ public class Ingreso : MonoBehaviour
         foreach (var item in items)
         {
             Globals.lives = int.Parse(item["lives"].ToString());
+            Globals.exp = int.Parse(item["exp"].ToString());
             LifeHandler.UpdateLife();
         }
     }
