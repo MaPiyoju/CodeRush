@@ -10,4 +10,6 @@ public static class Globals
 
     public static int lives = 3;
 
+    public static int exp = 0;
+
 }
