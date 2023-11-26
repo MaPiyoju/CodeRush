@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class UsersModel
 {
-    //public string ImageUrl = @"File://../../images/usersImg/man.jpg";
     public UsersModel(string name,int puntaje,string base64Image) {
         this.Name = name;
         this.Puntaje = puntaje;

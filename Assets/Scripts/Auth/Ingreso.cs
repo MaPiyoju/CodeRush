@@ -79,6 +79,7 @@ public class Ingreso : MonoBehaviour
             Globals.usuario = usuario;
             Debug.Log("usuario" + Globals.usuario.name);
             Globals.lives = int.Parse(item["lives"].ToString());
+            Globals.exp = int.Parse(item["exp"].ToString());
             LifeHandler.UpdateLife();
         }
     }

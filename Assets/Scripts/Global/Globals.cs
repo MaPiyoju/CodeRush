@@ -11,4 +11,6 @@ public static class Globals
     public static int lives = 3;
 
     public static UserModel usuario; 
+
+    public static int exp = 0;
 }
