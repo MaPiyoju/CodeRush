@@ -60,7 +60,7 @@ public class LoadStatsScript : MonoBehaviour
         MostrarUsuarios(usuariosFiltrados.ToArray());
     }
 
-    private string DeterminarNivelExperiencia(int exp)
+    public string DeterminarNivelExperiencia(int exp)
     {
         if (exp >= 0 && exp < 2000)
         {
