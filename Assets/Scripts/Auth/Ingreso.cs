@@ -1,5 +1,6 @@
 using Firebase.Extensions;
 using Firebase.Firestore;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -68,6 +69,15 @@ public class Ingreso : MonoBehaviour
         List<Dictionary<string, object>> items = await dbManager.ReadDataByIdAsync("users", auth.CurrentUser.UserId);
         foreach (var item in items)
         {
+            UserModel usuario = new UserModel();
+            usuario.name = item["name"].ToString();
+            usuario.alias = item["alias"].ToString();
+            //usuario.first_login = new DateTime();
+            usuario.exp = int.Parse(item["exp"].ToString());
+            usuario.streak = int.Parse(item["streak"].ToString());
+            //usuario.history = (List<MatchModel>)item["history"];
+            Globals.usuario = usuario;
+            Debug.Log("usuario" + Globals.usuario.name);
             Globals.lives = int.Parse(item["lives"].ToString());
             LifeHandler.UpdateLife();
         }
