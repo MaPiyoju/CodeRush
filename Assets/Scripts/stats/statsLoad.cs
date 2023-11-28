@@ -60,7 +60,7 @@ public class LoadStatsScript : MonoBehaviour
         MostrarUsuarios(usuariosFiltrados.ToArray());
     }
 
-    private string DeterminarNivelExperiencia(int exp)
+    public string DeterminarNivelExperiencia(int exp)
     {
         if (exp >= 0 && exp < 2000)
         {
@@ -124,10 +124,11 @@ public class LoadStatsScript : MonoBehaviour
         }
     }
 
-    private void obtenerExperienciaUsuario()
+    public string obtenerExperienciaUsuario()
     {
         experiencia = DeterminarNivelExperiencia(Globals.exp);
         //Debug.Log("EXPERIENCIA="+experiencia);
+        return experiencia;
     }
 
     // Update is called once per frame
