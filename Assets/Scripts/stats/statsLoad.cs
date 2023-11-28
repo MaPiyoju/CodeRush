@@ -124,10 +124,11 @@ public class LoadStatsScript : MonoBehaviour
         }
     }
 
-    private void obtenerExperienciaUsuario()
+    public string obtenerExperienciaUsuario()
     {
         experiencia = DeterminarNivelExperiencia(Globals.exp);
         //Debug.Log("EXPERIENCIA="+experiencia);
+        return experiencia;
     }
 
     // Update is called once per frame
